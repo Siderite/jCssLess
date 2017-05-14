@@ -1,0 +1,72 @@
+<!DOCTYPE XHTML 1.1 Strict />
+<html>
+<head>
+<style>
+#divOriginal {
+	float:left;
+	margin-right:250px;
+}
+#divStatus {
+	text-align:center;
+}
+#divStatus.success {
+	background-color:lightgreen;
+}
+#divStatus.fail {
+	background-color:pink;
+}
+#divTest {
+	clear:both;
+}
+</style>
+<script type="text/javascript" 
+        src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("jquery", "1.4.1");
+</script>
+<script src='jquery.cssLess.js'></script>
+<script type="text/javascript">
+	function start() {
+
+		// import test.less in the head block
+		$('head').importCss('test.less');
+		// functionality test
+		$.get('test.less',function(data) {
+			var content=$.interpretLess(data);
+			var success = (content.replace(/\n/g,'')==='/*  comments should be ignored by cssLess  *//*  c-style comments should also be ignored *//*  variables  */.redBackground {   background-color:red;}.genericDiv {   width:100px;   height:100px;   float:left;   margin-right:150px;}#div1 {/*  variable should be replaced  */   background-color:#ff1050;/*  mixin rules  */   width:100px;   height:100px;   float:left;   margin-right:150px;}#div2 {/*  mixin rules  */   background-color:red;   width:100px;   height:100px;   float:left;   margin-right:150px;/*  this should not break the rule  */   color :white;   border-style:solid;   border-color:black;/* from test2.less */   border-width:1px;/* from test2.less */}#div3 {   background-color:blue;/*  variable in the scope of #div3  *//*  nested rule  *//*  :hover should not be separated by div3 with space *//*  should be #20FF50  */   border-color:#20FF50;/*  mixin rules  */   width:100px;   height:100px;   float:left;   margin-right:150px;}#div3 a {/*  variable in inner scope  *//*  variable should be replaced  */   color:green;/*  should be white  */   border-color:white;}#div3:hover {   color:yellow;}/*  media query should not be interpreted as a variable  */@media print {/*  variables in the scope of @media print  */.redBackground {/*  variable out of scope, it should not be replaced  */   background-color:@color3;}#div1 {   width:100px;   height:100px;/*  variable should be replaced */   background-color:#20FF50;}#div2 {   width:100px;   height:100px;/*  mixin *//*  variable out of scope, it should not be replaced  */   background-color:@color3;}#div3 {   width:100px;   height:100px;   background-color:blue;}#div3 a {/* nested rule */   color:red;}}');
+			$('#divStatus')
+				.addClass(success?'success':'fail')
+				.append('<span>'+(success?'Test successful':'Test failed!')+'</span>');
+			$('#divOriginal').append('<pre>'+data+'</pre>');
+			$('#divResult').append('<pre>'+content+'</pre>');
+		});
+
+
+		setTimeout(function() {
+			var time;
+			var count=100;
+			//performance test
+			$.get('test.less',function(content) {
+				var d1=new Date();
+				for (var i=0; i<count; i++)
+					$.interpretLess(content);
+				time=(new Date()-d1)/count;
+				$('#divStatus span').append(' ('+time+' milliseconds in average)');
+			});
+		},200);
+	}
+</script>
+</head>
+<body onload="start();">
+	<div id=divDisplay>
+		<div id=div1><span>Some text</span><br/><a href="#">Some link</a></div>
+		<div id=div2><span>Some text</span><br/><a href="#">Some link</a></div>
+		<div id=div3><span>Some text</span><br/><a href="#">Some link</a></div>
+	</div>
+	<div id=divTest>
+		<div id=divStatus></div>
+		<div id=divOriginal><span>Original LESS style</span></div>
+		<div id=divResult><span>Resulting CSS style</span></div>
+	</div>
+</body>
+</html>

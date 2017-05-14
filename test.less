@@ -1,0 +1,96 @@
+/* comments should be ignored by cssLess */
+// c-style comments should also be ignored
+
+/* variables */
+@color2:#20FF50;
+@color:#ff1050;
+
+.redBackground {
+	background-color:red;
+}
+
+.genericDiv {
+	width:100px;
+	height:100px;
+	float:left;
+	margin-right:150px;
+}
+
+#div1 {
+	/* variable should be replaced */
+	background-color:@color;
+	/* mixin rules */
+	.genericDiv;
+}
+
+@import "test2.less";
+@import 'test3.less';
+
+#div2 {
+	/* mixin rules */
+	.redBackground;
+	.genericDiv;
+	color /* this should not break the rule */:white;
+	border-style:solid;
+	border-color:@test2_color; //from test2.less
+	border-width:@test3_width; //from test2.less
+}
+
+#div3 {
+	background-color:blue;
+	/* variable in the scope of #div3 */
+	@color3:green;
+	/* nested rule */
+	a { 
+		/* variable in inner scope */
+		@color2:white;
+		/* variable should be replaced */
+		color:@color3; 
+		/* should be white */
+		border-color:@color2;
+	}
+	// :hover should not be separated by div3 with space
+	:hover { color:yellow; }
+	/* should be #20FF50 */
+	border-color:@color2;
+	/* mixin rules */
+	.genericDiv;
+}
+
+
+/* media query should not be interpreted as a variable */
+@media print {
+
+	/* variables in the scope of @media print */
+	@color2:#20FF50;
+	@color:#ff1050;
+
+	.redBackground {
+		/* variable out of scope, it should not be replaced */
+		background-color:@color3;
+	}
+
+	#div1 {
+		width:100px;
+		height:100px;
+		// variable should be replaced
+		background-color:@color2;
+	}
+
+	#div2 {
+		width:100px;
+		height:100px;
+		// mixin
+		.redBackground;
+	}
+
+	#div3 {
+		width:100px;
+		height:100px;
+		background-color:blue;
+		a { //nested rule
+			color:red; 
+		}
+	}
+
+}
